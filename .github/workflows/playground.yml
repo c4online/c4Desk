@@ -81,6 +81,8 @@ jobs:
               date: "20231119"
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -92,7 +94,6 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
         with:
           ref: ${{ matrix.job.ref }}
-          submodules: recursive
 
       - name: Import the codesign cert
         if: env.MACOS_P12_BASE64 != null
@@ -249,11 +250,12 @@ jobs:
               ref: master, # latest
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Checkout source code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
         with:
           ref: ${{ matrix.job.ref }}
-          submodules: recursive
 
       - name: Install dependencies
         run: |

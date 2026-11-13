@@ -109,6 +109,8 @@ jobs:
               build-args: "",
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -119,7 +121,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Restore bridge files
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -398,6 +399,8 @@ jobs:
             }
           # - { target: aarch64-pc-windows-msvc, os: windows-2022 }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -408,7 +411,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Install LLVM and Clang
         uses: rustdesk-org/install-llvm-action-32bit@6aa7d9ad3df84dff01cd4596dd0fc880a7f47fce # no release tag; commit 2026-05-26
@@ -555,6 +557,8 @@ jobs:
               vcpkg-triplet: arm64-ios,
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -568,7 +572,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -683,6 +686,8 @@ jobs:
               vcpkg-triplet: arm64-osx,
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -693,7 +698,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Import the codesign cert
         if: env.MACOS_P12_BASE64 != null
@@ -885,6 +889,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.upload-artifact }}
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -950,6 +956,8 @@ jobs:
               suffix: "",
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
@@ -1006,7 +1014,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -1222,6 +1229,8 @@ jobs:
       x86_target: "" # can be ",android-x86"
       suffix: ""
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
@@ -1278,7 +1287,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Install flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -1422,6 +1430,8 @@ jobs:
               vcpkg-triplet: arm64-linux,
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -1443,7 +1453,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Set Swap Space
         if: ${{ matrix.job.arch == 'x86_64' }}
@@ -1586,7 +1595,7 @@ jobs:
             mkdir -p ~/.cargo/
             echo """
               [source.crates-io]
-              registry = 'https://github.com/rust-lang/crates.io-index'
+              registry = 'sparse+https://index.crates.io/'
             """ > ~/.cargo/config
             cat ~/.cargo/config
             # start build
@@ -1763,6 +1772,8 @@ jobs:
               extra_features: ",unix-file-copy-paste",
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
         with:
@@ -1773,7 +1784,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Modify vcpkg.json for armv7
         if: matrix.job.vcpkg-triplet == 'arm-linux'
@@ -1988,10 +1998,11 @@ jobs:
           - { target: x86_64-unknown-linux-gnu, arch: x86_64 }
           - { target: aarch64-unknown-linux-gnu, arch: aarch64 }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Download Binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -2062,10 +2073,11 @@ jobs:
               suffix: "",
             }
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Download Binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -2123,10 +2135,11 @@ jobs:
     env:
       RELEASE_NAME: web-basic
     steps:
+      - name: Fix script permissions
+        run: chmod +x flutter/*.sh .github/patches/*.sh *.sh res/*.sh 2>/dev/null || true
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Prepare env
         run: |
