@@ -1,4 +1,5 @@
 name: Flutter Tag Build
+name: Flutter Tag Build
 permissions:
   contents: write
 
