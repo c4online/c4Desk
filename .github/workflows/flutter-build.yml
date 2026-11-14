@@ -1110,8 +1110,6 @@ jobs:
             sed -i -e "s/MACOSX_DEPLOYMENT_TARGET = [0-9]*.[0-9]*;/MACOSX_DEPLOYMENT_TARGET = ${MIN_MACOS_VERSION};/" flutter/macos/Runner.xcodeproj/project.pbxproj
             echo "MACOSX_DEPLOYMENT_TARGET=${MIN_MACOS_VERSION}" >> "$GITHUB_ENV"
           fi
-    chmod +x build.py flutter/*.sh
-    chmod +x build.py
           ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
 
       - name: Test verified updates
@@ -1127,8 +1125,6 @@ jobs:
         run: |
           # The build's own features, so the tests see the code that ships. MACOSX_DEPLOYMENT_TARGET
           # comes from the build step's export.
-    chmod +x build.py flutter/*.sh
-    chmod +x build.py
           FEATURES=$(./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }} --print-features)
           cargo test --locked --release --lib --features "$FEATURES"
           # Opt-in, and its macOS tests run nowhere else.
@@ -1557,7 +1553,6 @@ jobs:
               ANDROID_TARGET=x86
             ;;
           esac
-    chmod +x flutter/*.sh flutter/ndk*.sh build.py
           if ! ./flutter/build_android_deps.sh "${ANDROID_TARGET}"; then
             find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
               echo "$_1:"
@@ -2173,7 +2168,6 @@ jobs:
             pushd /workspace
             export CARGO_INCREMENTAL=0
             export DEB_ARCH=${{ matrix.job.deb_arch }}
-    chmod +x build.py
             python3 ./build.py --flutter --skip-cargo
             for name in rustdesk*??.deb; do
               mv "$name" "${name%%.deb}-${{ matrix.job.arch }}.deb"
@@ -2435,7 +2429,6 @@ jobs:
             # use the .so built on the runner; build.py checks it is the pinned checkout
             export DRMTAP_PREBUILT_DIR=/workspace/third_party/libdrmtap/build-pkg
             # ask build.py for the features so this line and the packaging line cannot drift
-    chmod +x build.py
             FEATURES=$(python3 ./build.py --flutter --drm --hwcodec --unix-file-copy-paste --print-features)
             # an empty or error-shaped value would silently build a stock binary
             for want in drm drm-wake; do
@@ -2522,7 +2515,6 @@ jobs:
             pushd /workspace
             export CARGO_INCREMENTAL=0
             export DEB_ARCH=amd64
-    chmod +x build.py
             python3 ./build.py --flutter --drm --hwcodec --unix-file-copy-paste --skip-cargo
             for name in rustdesk*??.deb; do
               mv "$name" "${name%%.deb}-x86_64.deb"
