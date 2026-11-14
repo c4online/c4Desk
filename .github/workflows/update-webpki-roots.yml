@@ -1,4 +1,7 @@
 name: Update webpki-roots
+permissions:
+  contents: write
+
 
 # Weekly refresh of the compiled-in TLS root certificates (the webpki-roots
 # crate, a snapshot of the Mozilla root store). Roots are otherwise frozen at

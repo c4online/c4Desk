@@ -1,4 +1,7 @@
 name: wf-cliprdr CI
+permissions:
+  contents: write
+
 
 on:
   workflow_dispatch:

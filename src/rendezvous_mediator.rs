@@ -122,11 +122,9 @@ impl RendezvousMediator {
         }
         crate::hbbs_http::sync::start();
         #[cfg(target_os = "windows")]
-        // 【自动更新已禁用】注释掉服务启动时的自动更新线程
-        if false {
         if crate::platform::is_installed() && crate::is_server() {
-            crate::updater::start_auto_update();
-        }
+            // 【自动更新已禁用】服务启动后不自动启动更新线程
+            // crate::updater::start_auto_update();
         }
         check_zombie();
         let server = new_server();
@@ -408,8 +406,6 @@ impl RendezvousMediator {
                 });
             }
             Some(rendezvous_message::Union::ConfigureUpdate(cu)) => {
-                // 【锁死默认服务器】忽略服务端下发的rendezvous_servers，不允许远端覆盖
-                if false {
                 let v0 = Config::get_rendezvous_servers();
                 Config::set_option(
                     "rendezvous-servers".to_owned(),
@@ -418,7 +414,6 @@ impl RendezvousMediator {
                 Config::set_serial(cu.serial);
                 if v0 != Config::get_rendezvous_servers() {
                     Self::restart();
-                }
                 }
             }
             _ => {}

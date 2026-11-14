@@ -17,7 +17,6 @@ enum UpdateMsg {
 }
 
 lazy_static::lazy_static! {
-    // 【自动更新已禁用】不再启动后台更新检查线程，TX_MSG固定为None
     static ref TX_MSG : Mutex<Option<Sender<UpdateMsg>>> = Mutex::new(None);
 }
 
@@ -29,21 +28,23 @@ pub fn update_controlling_session_count(count: usize) {
     CONTROLLING_SESSION_COUNT.store(count, Ordering::SeqCst);
 }
 
-#[allow(dead_code)]
 pub fn start_auto_update() {
-    // 【自动更新已禁用】后台自动更新线程不再启动，手动检查仍可通过"检查更新"按钮触发
+    // 【自动更新已禁用】后台自动检查更新线程不启动
 }
 
-#[allow(dead_code)]
 pub fn manually_check_update() -> ResultType<()> {
-    // 【自动更新已禁用】后台线程已移除，手动检查直接在当前线程做版本检查，但不下载/不替换安装（避免官方包覆盖c4Desk）
-    // 保留手动触发的版本查询入口供调试，返回 Ok 让 UI 走"无更新"路径。
+    // 【自动更新已禁用】手动检查更新保留功能
+    if let Some(sender) = TX_MSG.lock().unwrap().as_ref() {
+        sender.send(UpdateMsg::CheckUpdate)?;
+    } else {
+        // 如果自动更新线程未启动，直接触发一次检查
+        std::thread::spawn(move || allow_err!(crate::common::do_check_software_update()));
+    }
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn stop_auto_update() {
-    // 【自动更新已禁用】无需停止
+    // 【自动更新已禁用】无自动更新线程需要停止
 }
 
 #[inline]
@@ -75,14 +76,12 @@ fn has_no_controlling_conns() -> bool {
     true
 }
 
-#[allow(dead_code)]
 fn start_auto_update_check() -> Sender<UpdateMsg> {
     let (tx, rx) = channel();
     std::thread::spawn(move || start_auto_update_check_(rx));
     return tx;
 }
 
-#[allow(dead_code)]
 fn start_auto_update_check_(rx_msg: Receiver<UpdateMsg>) {
     std::thread::sleep(Duration::from_secs(30));
     if let Err(e) = check_update(false) {
@@ -119,7 +118,6 @@ fn start_auto_update_check_(rx_msg: Receiver<UpdateMsg>) {
     }
 }
 
-#[allow(dead_code)]
 fn check_update(manually: bool) -> ResultType<()> {
     #[cfg(target_os = "windows")]
     let update_msi = crate::platform::is_msi_installed()? && !crate::is_custom_client();

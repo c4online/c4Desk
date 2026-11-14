@@ -416,20 +416,11 @@ jobs:
           version: ${{ env.LLVM_VERSION }}
 
       - name: Install Rust toolchain
-        shell: bash
-        run: |
-          # Sciter's abi_thiscall feature requires nightly Rust.
-          # Use an i686 host toolchain so build scripts can load the 32-bit LLVM installed above.
-          # Since rustup 1.29.1, i686 toolchains on x64 Windows require --force-non-host
-          # for both installation and default selection, even though WOW64 can run them.
-          # See https://github.com/rust-lang/rustup/pull/4935.
-          # Alternatively, an x64 compiler could use cargo build --target i686-pc-windows-msvc.
-          # This requires 64-bit LLVM for host build scripts and updated packaging paths,
-          # and has not been manually verified for RustDesk.
-          rustup toolchain install nightly-2023-10-13-${{ matrix.job.target }} \
-            --target ${{ matrix.job.target }} --component rustfmt \
-            --profile minimal --no-self-update --force-non-host
-          rustup default nightly-2023-10-13-${{ matrix.job.target }} --force-non-host
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: nightly-2023-10-13-${{ matrix.job.target }} # must use nightly here, because of abi_thiscall feature required
+          targets: ${{ matrix.job.target }}
+          components: "rustfmt"
 
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
@@ -1048,7 +1039,7 @@ jobs:
               ANDROID_TARGET=x86
             ;;
           esac
-          if ! ./flutter/build_android_deps.sh "${ANDROID_TARGET}"; then
+          if ! bash ./flutter/build_android_deps.sh "${ANDROID_TARGET}"; then
             find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
               echo "$_1:"
               echo "======"
@@ -1086,22 +1077,22 @@ jobs:
           cargo install cargo-ndk --version ${{ env.CARGO_NDK_VERSION }} --locked
           case ${{ matrix.job.target }} in
             aarch64-linux-android)
-              ./flutter/ndk_arm64.sh
+              bash ./flutter/ndk_arm64.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/arm64-v8a
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/arm64-v8a/librustdesk.so
             ;;
             armv7-linux-androideabi)
-              ./flutter/ndk_arm.sh
+              bash ./flutter/ndk_arm.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/armeabi-v7a
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/armeabi-v7a/librustdesk.so
             ;;
             x86_64-linux-android)
-              ./flutter/ndk_x64.sh
+              bash ./flutter/ndk_x64.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86_64
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86_64/librustdesk.so
             ;;
             i686-linux-android)
-              ./flutter/ndk_x86.sh
+              bash ./flutter/ndk_x86.sh
               mkdir -p ./flutter/android/app/src/main/jniLibs/x86
               cp ./target/${{ matrix.job.target }}/release/liblibrustdesk.so ./flutter/android/app/src/main/jniLibs/x86/librustdesk.so
             ;;
@@ -1532,6 +1523,8 @@ jobs:
             --volume "/opt/artifacts:/opt/artifacts"
           shell: /bin/bash
           install: |
+            # fix Ubuntu 18.04 EOL apt sources
+            sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g; s|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
             apt-get update -y
             echo -e "installing deps"
             apt-get install -y \
@@ -1586,7 +1579,9 @@ jobs:
             mkdir -p ~/.cargo/
             echo """
               [source.crates-io]
-              registry = 'https://github.com/rust-lang/crates.io-index'
+              replace-with = 'sparse'
+              [source.sparse]
+              registry = 'sparse+https://index.crates.io/'
             """ > ~/.cargo/config
             cat ~/.cargo/config
             # start build
@@ -1783,12 +1778,6 @@ jobs:
           echo "Modified vcpkg.json for armv7 build:"
           grep -A 2 -B 2 '"baseline"' vcpkg.json
 
-      - name: Set Swap Space
-        if: matrix.job.arch == 'armv7'
-        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c # v1.0
-        with:
-          swap-size-gb: 12
-
       - name: Free Space
         run: |
           df -h
@@ -1819,6 +1808,8 @@ jobs:
             --volume "${PWD}:/workspace"
           shell: /bin/bash
           install: |
+            # fix Ubuntu 18.04 EOL apt sources
+            sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g; s|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
             apt-get update
             apt-get install -y \
                build-essential \
@@ -1913,6 +1904,8 @@ jobs:
             mkdir -p ~/.cargo/
             echo """
               [source.crates-io]
+              replace-with = 'sparse'
+              [source.sparse]
               registry = 'sparse+https://index.crates.io/'
             """ > ~/.cargo/config
             cat ~/.cargo/config
@@ -1934,16 +1927,6 @@ jobs:
             # build rustdesk
             python3 ./res/inline-sciter.py
             export CARGO_INCREMENTAL=0
-            # armv7 is the only 32-bit target in this job that links the whole binary, and the
-            # release profile uses fat LTO with codegen-units=1. LLVM then merges every module
-            # into a single unit and runs past the ~3GB address space a 32-bit process gets,
-            # aborting rustc with "Rust cannot catch foreign exceptions" (a C++ bad_alloc from
-            # LLVM unwinding into rustc's Rust frames). Thin LTO keeps peak memory bounded and
-            # still allows cross-crate inlining; 64-bit targets keep fat LTO untouched.
-            if [ "${{ matrix.job.arch }}" = "armv7" ]; then
-              export CARGO_PROFILE_RELEASE_LTO=thin
-              export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16
-            fi
             cargo build --locked --features inline${{ matrix.job.extra_features }} --release --bins --jobs 1
             # make debian package
             mkdir -p ./Release
@@ -2090,6 +2073,8 @@ jobs:
             --volume "${PWD}:/workspace"
           shell: /bin/bash
           install: |
+            # fix Ubuntu 18.04 EOL apt sources
+            sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g; s|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
             apt-get update -y
             apt-get install -y git flatpak flatpak-builder
           run: |
