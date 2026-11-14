@@ -21,10 +21,11 @@ const disable_change_permanent_password = handler.get_builtin_option("disable-ch
 const disable_change_id = handler.get_builtin_option("disable-change-id") == "Y";
 
 // html min-width, min-height not working on mac, below works for all
+// Sciter applies Windows DPI scaling to these minimum dimensions.
 if (incoming_only) {
-  view.windowMinSize = (scaleIt(incoming_only_width), scaleIt((handler.is_installed() || disable_installation) ? 300 : 390));
+  view.windowMinSize = (incoming_only_width, (handler.is_installed() || disable_installation) ? 300 : 390);
 } else {
-  view.windowMinSize = (scaleIt(560), scaleIt(300));
+  view.windowMinSize = (560, 300);
 }
 
 var app;
@@ -93,7 +94,7 @@ class ConnectStatus: Reactor.Component {
     }
 
     event click $(#setup-server) () {
-        handler.open_url("http://r.3d98.com.cn:21114");
+        handler.open_url("https://rustdesk.com/blog/id-relay-set/");
     }
 }
 
@@ -601,8 +602,8 @@ class MyIdMenu: Reactor.Component {
         msgbox("custom-nocancel-nook-hasclose", translate("About") + " " + name, "<div style='line-height: 2em'> \
             <div>Version: " + handler.get_version() + " \
             <div>Fingerprint: " + handler.get_fingerprint() + " \
-            <div .link .custom-event url='http://r.3d98.com.cn:21114/_admin/privacy.html'>" + translate("Privacy Statement") + "</div> \
-            <div .link .custom-event url='http://r.3d98.com.cn:21114'>" + translate("Website") + "</div> \
+            <div .link .custom-event url='https://rustdesk.com/privacy.html'>" + translate("Privacy Statement") + "</div> \
+            <div .link .custom-event url='https://rustdesk.com'>" + translate("Website") + "</div> \
 	    <div style='background: #2c8cff; color: white; padding: 1em; margin-top: 1em;'>Copyright &copy; 2026 Purslane Tech Pte. Ltd.\
             <br />" + handler.get_license() + " \
             <p style='font-weight: bold'>" + translate("Slogan_tip") + "</p>\
@@ -834,10 +835,10 @@ class UpdateMe: Reactor.Component {
     }
 
     event click $(#install-me) {
-        handler.open_url("http://r.3d98.com.cn:21114");
+        handler.open_url("https://rustdesk.com/download");
         return;
         if (!is_win) {
-            handler.open_url("http://r.3d98.com.cn:21114");
+            handler.open_url("https://rustdesk.com");
             return;
         }
         var url = software_update_url + '.' + handler.get_software_ext();
@@ -1343,7 +1344,7 @@ event change $(#msgbox input[name='confirmation']) {
 $(body).content(<div style="size:*"><App /><div #msgbox /></div>);
 
 event click $(#powered-by) {
-    handler.open_url("http://r.3d98.com.cn:21114");
+    handler.open_url("https://rustdesk.com");
 }
 
 event click $(#open-settings) (_, me) {

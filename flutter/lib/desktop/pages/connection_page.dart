@@ -41,7 +41,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   double? get height => bind.isIncomingOnly() ? null : em * 3;
 
   void onUsePublicServerGuide() {
-    const url = "http://r.3d98.com.cn:21114";
+    const url = "http://r.3d98.com.cn:21114/pricing";
     canLaunchUrlString(url).then((can) {
       if (can) {
         launchUrlString(url);
@@ -78,17 +78,36 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
               .marginOnly(left: em),
         );
 
-    Widget setupServerWidget() => Flexible(
-       child: Offstage(
-         offstage: !(!_svcStopped.value &&
-             stateGlobal.svcStatus.value == SvcStatus.ready &&
-             _svcIsUsingPublicServer.value),
-         child: Row(
-           crossAxisAlignment: CrossAxisAlignment.center,
-           children: [],
-         ),
-       ),
-     );
+    setupServerWidget() => Flexible(
+          child: Offstage(
+            offstage: !(!_svcStopped.value &&
+                stateGlobal.svcStatus.value == SvcStatus.ready &&
+                _svcIsUsingPublicServer.value),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(', ', style: TextStyle(fontSize: em)),
+                Flexible(
+                  child: InkWell(
+                    onTap: onUsePublicServerGuide,
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            translate('setup_server_tip'),
+                            style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontSize: em),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
 
     basicWidget() => Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -311,12 +330,47 @@ class _ConnectionPageState extends State<ConnectionPage>
   void onConnect(
       {bool isFileTransfer = false,
       bool isViewCamera = false,
-      bool isTerminal = false}) {
+      bool isTerminal = false,
+      bool isTcpTunneling = false}) {
     var id = _idController.id;
     connect(context, id,
         isFileTransfer: isFileTransfer,
         isViewCamera: isViewCamera,
-        isTerminal: isTerminal);
+        isTerminal: isTerminal,
+        isTcpTunneling: isTcpTunneling);
+  }
+
+  MenuEntrySubMenu<String> _requestApprovalMenu(BuildContext context) {
+    MenuEntryButton<String> action(String title,
+            {bool isFileTransfer = false,
+            bool isViewCamera = false,
+            bool isTerminal = false,
+            bool isTcpTunneling = false}) =>
+        MenuEntryButton<String>(
+          childBuilder: (style) => Text(translate(title), style: style),
+          proc: () => connect(context, _idController.id,
+              loginMethod: 'request-approval',
+              isFileTransfer: isFileTransfer,
+              isViewCamera: isViewCamera,
+              isTerminal: isTerminal,
+              isTcpTunneling: isTcpTunneling),
+          padding: EdgeInsets.symmetric(horizontal: kDesktopMenuPadding.left),
+          dismissOnClicked: true,
+        );
+
+    return MenuEntrySubMenu<String>(
+      text: translate('Request approval'),
+      dismissParentOnCanceled: true,
+      padding: EdgeInsets.symmetric(horizontal: kDesktopMenuPadding.left),
+      arrowScale: MenuConfig.iconScale,
+      entries: [
+        action('Connect'),
+        action('Transfer file', isFileTransfer: true),
+        action('View camera', isViewCamera: true),
+        action('${translate('Terminal')} (beta)', isTerminal: true),
+        if (isDesktop) action('TCP tunneling', isTcpTunneling: true),
+      ],
+    );
   }
 
   /// UI for the remote ID TextField.
@@ -549,8 +603,17 @@ class _ConnectionPageState extends State<ConnectionPage>
                                       '${translate('Terminal')} (beta)',
                                       () => onConnect(isTerminal: true)
                                     ),
+                                    // `connect` routes this through the
+                                    // desktop path only; the peer card gates
+                                    // it the same way.
+                                    if (isDesktop)
+                                      (
+                                        'TCP tunneling',
+                                        () => onConnect(isTcpTunneling: true)
+                                      ),
                                   ]
-                                      .map((e) => MenuEntryButton<String>(
+                                      .map<MenuEntryBase<String>>(
+                                          (e) => MenuEntryButton<String>(
                                             childBuilder: (TextStyle? style) =>
                                                 Text(
                                               translate(e.$1),
@@ -562,6 +625,10 @@ class _ConnectionPageState extends State<ConnectionPage>
                                                     kDesktopMenuPadding.left),
                                             dismissOnClicked: true,
                                           ))
+                                      .followedBy([
+                                        MenuEntryDivider<String>(),
+                                        _requestApprovalMenu(context),
+                                      ])
                                       .map((e) => e.build(
                                           context,
                                           const MenuConfig(
