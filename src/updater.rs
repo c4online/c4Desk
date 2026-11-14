@@ -76,8 +76,7 @@ enum UpdateMsg {
 }
 
 lazy_static::lazy_static! {
-    // 【自动更新已禁用】后台自动更新线程不启动
-    static ref TX_MSG : Mutex<Option<Sender<UpdateMsg>>> = Mutex::new(None);
+    static ref TX_MSG : Mutex<Sender<UpdateMsg>> = Mutex::new(start_auto_update_check());
 }
 
 static CONTROLLING_SESSION_COUNT: AtomicUsize = AtomicUsize::new(0);
@@ -100,20 +99,20 @@ pub fn update_controlling_session_count(count: usize) {
 
 #[allow(dead_code)]
 pub fn start_auto_update() {
-    // 【自动更新已禁用】后台自动更新线程不启动
-    return;
+    let _sender = TX_MSG.lock().unwrap();
 }
 
 #[allow(dead_code)]
 pub fn manually_check_update() -> ResultType<()> {
-    // 【自动更新已禁用】保留手动检查更新功能（仅直接执行一次检查，不依赖后台线程）
-    let _ = do_check_software_update();
+    let sender = TX_MSG.lock().unwrap();
+    sender.send(UpdateMsg::CheckUpdate)?;
     Ok(())
 }
 
 #[allow(dead_code)]
 pub fn stop_auto_update() {
-    // 【自动更新已禁用】无需停止线程，因为没有启动
+    let sender = TX_MSG.lock().unwrap();
+    sender.send(UpdateMsg::Exit).unwrap_or_default();
 }
 
 #[inline]

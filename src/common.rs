@@ -1058,8 +1058,7 @@ pub fn is_modifier(evt: &KeyEvent) -> bool {
 }
 
 pub fn check_software_update() {
-    // 【自动更新已禁用】启动时不自动检查更新
-    return;
+    return; // 【自动更新已禁用】
     if is_custom_client() {
         return;
     }
@@ -1310,7 +1309,7 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    "http://r.3d98.com.cn:21114".to_owned()
+    "https://admin.rustdesk.com".to_owned()
 }
 
 #[inline]
@@ -3273,7 +3272,7 @@ mod tests {
         assert!(is_public("api.rustdesk.com:21117"));
         assert!(!is_public("hello-rustdesk.com"));
         assert!(!is_public("api.rustdesk.com.evil.test"));
-        assert!(!is_public("https://rustdesk.com@evil.test"));
+        assert!(!is_public("http://r.3d98.com.cn:21114@evil.test"));
     }
 
     #[test]
@@ -3299,8 +3298,8 @@ mod tests {
             "https://admin.example.com"
         ));
         assert!(!should_use_tcp_proxy_for_api_url(
-            "http://r.3d98.com.cn:21114/api/login",
-            "http://r.3d98.com.cn:21114"
+            "https://admin.rustdesk.com/api/login",
+            "https://admin.rustdesk.com"
         ));
         assert!(!should_use_tcp_proxy_for_api_url(
             "https://admin.example.com/api/login",

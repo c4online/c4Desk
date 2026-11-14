@@ -642,7 +642,7 @@ mod tests {
         Config::set_option("relay-server".to_string(), "127.0.0.1".to_string());
         Config::set_option(
             "api-server".to_string(),
-            "http://r.3d98.com.cn:21114".to_string(),
+            "https://api.rustdesk.com".to_string(),
         );
         assert_eq!(
             check_ws("[0:0:0:0:0:0:0:1]:21115"),
@@ -759,7 +759,7 @@ mod tests {
             "custom-rendezvous-server".to_string(),
             "rustdesk.com".to_string(),
         );
-        Config::set_option("relay-server".to_string(), "r.3d98.com.cn".to_string());
+        Config::set_option("relay-server".to_string(), "relay.rustdesk.com".to_string());
         Config::set_option(
             "api-server".to_string(),
             "https://rustdesk.com:8443".to_string(),
@@ -774,8 +774,8 @@ mod tests {
             "wss://rustdesk.com:8443/ws/relay"
         );
         assert_eq!(
-            check_ws("r.3d98.com.cn:21117"),
-            "ws://r.3d98.com.cn:21117/ws/relay"
+            check_ws("relay.rustdesk.com:21117"),
+            "wss://relay.rustdesk.com:8443/ws/relay"
         );
         // a peer's server or a relay on another host keeps the default port
         assert_eq!(check_ws("example.com:21116"), "wss://example.com/ws/id");

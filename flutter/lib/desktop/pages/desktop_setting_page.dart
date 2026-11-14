@@ -524,8 +524,8 @@ class _GeneralState extends State<_General> {
   Widget other() {
     final incomingOnly = bind.isIncomingOnly();
     final outgoingOnly = bind.isOutgoingOnly();
-    // 【自动更新已禁用】Auto update开关始终隐藏
-    final showAutoUpdate = false;
+    final showAutoUpdate = (isWindows && bind.mainIsInstalled()) ||
+    (isMacOS && bind.mainIsInstalled() && bind.mainIsInstalledDaemon(prompt: false) && !bind.isCustomClient());
     final children = <Widget>[
       if (!isWeb && !incomingOnly)
         _OptionCheckBox(context, 'Confirm before closing multiple tabs',
@@ -593,14 +593,13 @@ class _GeneralState extends State<_General> {
             ),
           ),
       ],
-      // 【自动更新已禁用】"启动时检查更新"开关已移除
-      // if (!isWeb && !bind.isCustomClient())
-      //   _OptionCheckBox(
-      //     context,
-      //     'Check for software update on startup',
-      //     kOptionEnableCheckUpdate,
-      //     isServer: false,
-      //   ),
+      if (!isWeb && !bind.isCustomClient())
+        _OptionCheckBox(
+          context,
+          'Check for software update on startup',
+          kOptionEnableCheckUpdate,
+          isServer: false,
+        ),
       if (showAutoUpdate)
         _OptionCheckBox(
           context,

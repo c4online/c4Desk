@@ -1,5 +1,5 @@
-# This yaml shares the build bridge steps with ci and nightly.
 name: Build flutter-rust-bridge
+# This yaml shares the build bridge steps with ci and nightly.
 # 2023-11-23 18:00:00+00:00
 
 on:
@@ -37,7 +37,6 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          submodules: recursive
 
       - name: Install prerequisites
         run: |
