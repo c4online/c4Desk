@@ -1,7 +1,4 @@
 name: Full Flutter CI
-permissions:
-  contents: write
-
 
 on:
   workflow_dispatch:

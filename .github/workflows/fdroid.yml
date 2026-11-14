@@ -1,7 +1,4 @@
 name: Fdroid version file generation
-permissions:
-  contents: write
-
 
 on:
   workflow_dispatch:

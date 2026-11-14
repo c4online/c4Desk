@@ -1,7 +1,4 @@
 name: Flutter Nightly Build
-permissions:
-  contents: write
-
 
 on:
   schedule:

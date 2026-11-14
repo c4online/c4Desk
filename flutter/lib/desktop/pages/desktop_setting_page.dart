@@ -524,7 +524,7 @@ class _GeneralState extends State<_General> {
   Widget other() {
     final incomingOnly = bind.isIncomingOnly();
     final outgoingOnly = bind.isOutgoingOnly();
-    // 【自动更新已禁用】原值：(isWindows && bind.mainIsInstalled()) || (isMacOS && ...)
+    // 【自动更新已禁用】Auto update开关始终隐藏
     final showAutoUpdate = false;
     final children = <Widget>[
       if (!isWeb && !incomingOnly)
@@ -601,7 +601,6 @@ class _GeneralState extends State<_General> {
       //     kOptionEnableCheckUpdate,
       //     isServer: false,
       //   ),
-      // 【自动更新已禁用】"Auto update"开关已移除
       if (showAutoUpdate)
         _OptionCheckBox(
           context,
