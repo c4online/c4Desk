@@ -857,8 +857,8 @@ pub fn lock_screen() {
 /// silent auto-update thread.
 pub fn start_os_service() {
     log::info!("Username: {}", crate::username());
-    // Silent auto-update — runs as root via LaunchDaemon, no osascript dialog needed
-    crate::updater::start_auto_update_macos();
+    // 【自动更新已禁用】不启动 macOS 后台静默自动更新线程（保留手动检查更新）
+    // crate::updater::start_auto_update_macos();
     if let Err(err) = crate::ipc::start("_service") {
         log::error!("Failed to start ipc_service: {}", err);
     }
