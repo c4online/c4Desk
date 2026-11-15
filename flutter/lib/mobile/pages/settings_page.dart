@@ -1099,7 +1099,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
             SettingsTile(
               title: Text(translate("Privacy Statement")),
               onPressed: (context) =>
-                  launchUrlString('http://r.3d98.com.cn:21114/privacy.html'),
+                  launchUrlString('http://r.3d98.com.cn:21114/webclient2/privacy.html'),
               leading: Icon(Icons.privacy_tip),
             )
           ],

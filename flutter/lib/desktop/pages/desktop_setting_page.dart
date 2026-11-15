@@ -2617,7 +2617,7 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('http://r.3d98.com.cn:21114/privacy.html');
+                    launchUrlString('http://r.3d98.com.cn:21114/webclient2/privacy.html');
                   },
                   child: Text(
                     translate('Privacy Statement'),
